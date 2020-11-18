@@ -9,6 +9,7 @@ name = "pypi"
 pytest = "*"
 flake8 = "*"
 pyyaml = "*"
+requests = "*"
 
 [requires]
 python_version = "3.8"
