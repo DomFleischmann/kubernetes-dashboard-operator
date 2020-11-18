@@ -14,22 +14,22 @@ SPEC_FILE = Path(__file__).parent / 'validate-dns-spec.yaml'
 
 def test_charm():
     metrics_scraper_ready = run(
-        'microk8s.kubectl', 'get', 'pod', '-n', 'kubernetes-dashboard', '-l', 'juju-app=dashboard-metrics-scraper',
+        'kubectl', 'get', 'pod', '-n', 'kubernetes-dashboard', '-l', 'juju-app=dashboard-metrics-scraper',
         '-o', 'jsonpath={..status.containerStatuses[0].ready}')
     assert metrics_scraper_ready == 'true'
 
     dashboard_ready = run(
-        'microk8s.kubectl', 'get', 'pod', '-n', 'kubernetes-dashboard', '-l', 'juju-app=k8s-dashboard',
+        'kubectl', 'get', 'pod', '-n', 'kubernetes-dashboard', '-l', 'juju-app=k8s-dashboard',
         '-o', 'jsonpath={..status.containerStatuses[0].ready}')
     assert dashboard_ready == 'true'
 
     raw_config_data = run(
-        'microk8s.kubectl', 'config', 'view')
+        'kubectl', 'config', 'view')
     config_data = yaml.safe_load(raw_config_data)
     url = config_data["clusters"][0]["cluster"]["server"]
 
     raw_secret_data = run(
-        'microk8s.kubectl', 'get', 'secrets', '-n', 'kubernetes-dashboard',
+        'kubectl', 'get', 'secrets', '-n', 'kubernetes-dashboard',
         '-o', 'yaml', '--field-selector', 'type=kubernetes.io/service-account-token')
 
     secret_data = yaml.safe_load(raw_secret_data)
