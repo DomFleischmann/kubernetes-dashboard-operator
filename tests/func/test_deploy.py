@@ -31,22 +31,22 @@ def test_deploy_charm():
 def test_charm():
     print("Testing Charms")
     metrics_scraper_ready = run(
-        'kubectl', 'get', 'pod', '-n', 'kubernetes-dashboard', '-l', 'juju-app=dashboard-metrics-scraper',
+        'microk8s.kubectl', 'get', 'pod', '-n', 'kubernetes-dashboard', '-l', 'juju-app=dashboard-metrics-scraper',
         '-o', 'jsonpath={..status.containerStatuses[0].ready}')
     assert metrics_scraper_ready == 'true'
 
     dashboard_ready = run(
-        'kubectl', 'get', 'pod', '-n', 'kubernetes-dashboard', '-l', 'juju-app=k8s-dashboard',
+        'microk8s.kubectl', 'get', 'pod', '-n', 'kubernetes-dashboard', '-l', 'juju-app=k8s-dashboard',
         '-o', 'jsonpath={..status.containerStatuses[0].ready}')
     assert dashboard_ready == 'true'
 
     raw_config_data = run(
-        'kubectl', 'config', 'view')
+        'microk8s.kubectl', 'config', 'view')
     config_data = yaml.safe_load(raw_config_data)
     url = config_data["clusters"][0]["cluster"]["server"]
 
     raw_secret_data = run(
-        'kubectl', 'get', 'secrets', '-n', 'kubernetes-dashboard',
+        'microk8s.kubectl', 'get', 'secrets', '-n', 'kubernetes-dashboard',
         '-o', 'yaml', '--field-selector', 'type=kubernetes.io/service-account-token')
 
     secret_data = yaml.safe_load(raw_secret_data)
