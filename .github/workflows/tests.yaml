@@ -40,47 +40,20 @@ jobs:
         # the user's .gitconfig file.
         cat /etc/gitconfig >> $HOME/.gitconfig
         sudo rm /etc/gitconfig
-    - name: Install MicroK8s
-      uses: balchua/microk8s-actions@v0.1.3
-      with:
-        rbac: 'true'
-        storage: 'true'
-        dns: 'true'  # required for juju, will adjust later
     - name: Install Dependencies
       run: |
         sudo apt update -yqq
         sudo snap install charmcraft --beta
         pip install tox
         sudo snap install juju --classic
+        sudo snap install microk8s --classic
         sudo snap install juju-wait --classic
+        microk8s.enable storage dns
         sudo usermod -aG microk8s $USER
-    - name: Build charms
-      run: |
-        if ! charmcraft build -f charms/dashboard-metrics-scraper; then
-          echo Build failed, full log:
-          cat "$(ls -1t "$HOME"/snap/charmcraft/common/charmcraft-log-* | head -n1)"
-          exit 1
-        fi
-
-        if ! charmcraft build -f charms/kubernetes-dashboard; then
-          echo Build failed, full log:
-          cat "$(ls -1t "$HOME"/snap/charmcraft/common/charmcraft-log-* | head -n1)"
-          exit 1
-        fi
     - name: Bootstrap MicroK8s with Juju
       run: sg microk8s 'juju bootstrap microk8s microk8s'
-    - name: Add model
-      run: juju add-model kubernetes-dashboard microk8s
-    - name: Deploy Dashboard Bundle
-      run: |
-        juju deploy ./docs/local-overlay.yaml
-    - name: Wait for stable environment
-      run: |
-        juju wait -wv
-        sleep 60
-        juju wait -wv
     - name: Run functional test
-      run: tox -e func
+      run: sg microk8s 'tox -e func'
     - name: Juju Status
       if: failure()
       run: sudo juju status --relations

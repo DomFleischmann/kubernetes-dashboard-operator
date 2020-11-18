@@ -12,7 +12,24 @@ CHARM_DIR = Path(__file__).parent.parent.parent.resolve()
 SPEC_FILE = Path(__file__).parent / 'validate-dns-spec.yaml'
 
 
+def test_build_charm():
+    print("Building Kubernetes Dashboard Charm")
+    run('charmcraft', 'build', '-f', 'charms/kubernetes-dashboard')
+    print("Building Dashboard Metrics Scraper Charm")
+    run('charmcraft', 'build', '-f', 'charms/dashboard-metrics-scraper')
+
+def test_deploy_charm():
+    print("Adding Model")
+    run('juju', 'add-model', 'kubernetes-dashboard', 'microk8s')
+    print("Deploying Local Bundle")
+    run('juju', 'deploy', './docs/local-overlay.yaml')
+    print("Waiting For Deployment to Finish")
+    run('juju', 'wait', '-wv')
+    sleep(60)
+    run('juju', 'wait', '-wv')
+
 def test_charm():
+    print("Testing Charms")
     metrics_scraper_ready = run(
         'kubectl', 'get', 'pod', '-n', 'kubernetes-dashboard', '-l', 'juju-app=dashboard-metrics-scraper',
         '-o', 'jsonpath={..status.containerStatuses[0].ready}')
@@ -47,7 +64,6 @@ def test_charm():
 
     print(headers)
     print(dashboard_url)
-
     resp = requests.get(dashboard_url, headers=headers, verify=False)
     assert resp.status_code == 200 and "Dashboard" in resp.text
 
