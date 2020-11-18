@@ -45,11 +45,9 @@ def test_charm():
         "{}/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login"
     ).format(url)
 
-<<<<<<< HEAD
-=======
     print(headers)
     print(dashboard_url)
->>>>>>> main
+
     resp = requests.get(dashboard_url, headers=headers, verify=False)
     assert resp.status_code == 200 and "Dashboard" in resp.text
 
