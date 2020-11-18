@@ -48,7 +48,8 @@ jobs:
         dns: 'true'  # required for juju, will adjust later
     - name: Install Dependencies
       run: |
-        script/bootstrap
+        sudo apt update -yqq
+        sudo snap install charmcraft --beta
         pip install tox
         sudo snap install juju --classic
         sudo snap install juju-wait --classic
