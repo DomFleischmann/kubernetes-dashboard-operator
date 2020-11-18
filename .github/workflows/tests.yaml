@@ -75,12 +75,15 @@ jobs:
       run: |
         juju deploy ./docs/local-overlay.yaml
     - name: Wait for stable environment
-      run: juju wait -wv
+      run: |
+        juju wait -wv
+        sleep 5
+        juju wait -wv
     - name: Run functional test
       run: tox -e func
     - name: Juju Status
       if: failure()
-      run: sudo juju status
+      run: sudo juju status --relations
     - name: Juju Log
       if: failure()
       run: sudo juju debug-log --replay --no-tail
